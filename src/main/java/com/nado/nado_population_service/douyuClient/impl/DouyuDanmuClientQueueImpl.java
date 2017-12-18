@@ -26,23 +26,24 @@ import org.springframework.stereotype.Service;
 import com.nado.nado_population_service.douyuClient.DouyuDanmuClient;
 
 @Service
-public class DouyuDanmuClientQueueImpl implements DouyuDanmuClient{
+public class DouyuDanmuClientQueueImpl implements DouyuDanmuClient {
 	private Long messageId = 0l;
 	private int BUFFER_SIZE = 0xA00000;
 	private char[] buffer = new char[BUFFER_SIZE];
 	BufferedReader reader = null;
 	private BlockingQueue<String> messages = new LinkedTransferQueue<>();
 	Socket clientSocket;
-	//used to reconnect
-	
+	// used to reconnect
+
 	private SocketAddress address;
-	
+
 	@PostConstruct
-	public void init(){
+	public void init() {
 		System.out.println("\n\nInit!!!\n\n");
 		clientSocket = douyuSocket();
-		//register(2020877+"");
+		// register(2020877+"");
 	}
+
 	public Socket douyuSocket() {
 		Socket result = new Socket();
 		try {
@@ -54,7 +55,7 @@ public class DouyuDanmuClientQueueImpl implements DouyuDanmuClient{
 		}
 		return null;
 	}
-	
+
 	@Override
 	public byte[] send(String msg) {
 		// TODO Auto-generated method stub
@@ -63,8 +64,8 @@ public class DouyuDanmuClientQueueImpl implements DouyuDanmuClient{
 		byte[] result = new byte[length + 13];
 		ByteBuffer buffer = ByteBuffer.allocate(length + 13);
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
-		buffer.putInt(result.length-4);
-		buffer.putInt(result.length-4);
+		buffer.putInt(result.length - 4);
+		buffer.putInt(result.length - 4);
 		buffer.putShort((short) 689);
 		buffer.put((byte) 0);
 		buffer.put((byte) 0);
@@ -85,12 +86,12 @@ public class DouyuDanmuClientQueueImpl implements DouyuDanmuClient{
 	@Override
 	public void register(String room_id) {
 		System.out.println("\n\nRegistering!!!\n\n");
-		if(clientSocket.isClosed()){
+		if (clientSocket.isClosed()) {
 			clientSocket = douyuSocket();
 		}
-		if(clientSocket.isConnected()){
-			
-		}else{
+		if (clientSocket.isConnected()) {
+
+		} else {
 			try {
 				clientSocket.connect(address);
 			} catch (IOException e) {
@@ -103,21 +104,21 @@ public class DouyuDanmuClientQueueImpl implements DouyuDanmuClient{
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			send("type@=loginreq/roomid@="+room_id+"/");
-			String message ="";
-			do{
+			send("type@=loginreq/roomid@=" + room_id + "/");
+			String message = "";
+			do {
 				message = take();
-				if(message.contains("loginres")){
+				if (message.contains("loginres")) {
 					break;
 				}
-			}while(true);
-			send("type@=joingroup/rid@="+room_id+"/gid@=-9999/");
+			} while (true);
+			send("type@=joingroup/rid@=" + room_id + "/gid@=-9999/");
 			System.out.println("\n\nRegistered!!!\n\n");
 		}
 	}
-	
+
 	@Scheduled(cron = "0/45 * * * * *")
-	public void heartbeat(){
+	public void heartbeat() {
 		send("type@=mrkl/");
 	}
 
@@ -125,8 +126,8 @@ public class DouyuDanmuClientQueueImpl implements DouyuDanmuClient{
 	public void logout() {
 		System.out.println("\n\nLogout!!!\n\n");
 		// TODO Auto-generated method stub
-		if(clientSocket.isConnected()){
-			send("type@=logout/");	
+		if (clientSocket.isConnected()) {
+			send("type@=logout/");
 		}
 		try {
 			clientSocket.close();
@@ -137,19 +138,19 @@ public class DouyuDanmuClientQueueImpl implements DouyuDanmuClient{
 	}
 
 	@Scheduled(cron = "* * * * * *")
-	public void getMessage(){
+	public void getMessage() {
 		try {
 			reader.read(buffer);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		spliteAndDecorateMessages(new String(buffer)).forEach(str->{
+		spliteAndDecorateMessages(new String(buffer)).forEach(str -> {
 			messages.offer(str);
 		});
-		Arrays.fill(buffer, (char)0);
+		Arrays.fill(buffer, (char) 0);
 	}
-	
+
 	@Override
 	public String take() {
 		String message = null;
@@ -173,16 +174,17 @@ public class DouyuDanmuClientQueueImpl implements DouyuDanmuClient{
 		// TODO Auto-generated method stub
 		return messages.size();
 	}
-	private Long newMessageId(){
+
+	private Long newMessageId() {
 		Long result = messageId;
 		messageId++;
 		return messageId;
 	}
-	private List<String> spliteAndDecorateMessages(String rawMessage){
-		String[] splitedRawMessage = (rawMessage.trim()).split("[^\\w^@^=^/]+");
-		return Arrays.asList(splitedRawMessage).stream()
-				.filter(str->str.contains("type"))
-				.map(str->str+"timestamp@="+new Date().getTime()+"/messageId@="+newMessageId()+"/")
+
+	private List<String> spliteAndDecorateMessages(String rawMessage) {
+		String[] splitedRawMessage = (rawMessage.trim()).split(new String(new char[] {(char)0}));
+		return Arrays.asList(splitedRawMessage).stream().filter(str -> str.contains("type"))
+				.map(str -> str + "timestamp@=" + new Date().getTime() + "/messageId@=" + newMessageId() + "/")
 				.collect(Collectors.toList());
 	}
 }
