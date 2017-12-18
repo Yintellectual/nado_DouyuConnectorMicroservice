@@ -61,9 +61,26 @@ public class DouyuDanmuClientBrokenMessageFilterTest {
 	}
 	@Test
 	public void isBrokenMessageIfMissingFieldsFor_chatmsg(){
-		String template = "type@=chatmsg/rid@=58839/ct@=8/uid@=123456/nn@=test/txt@=666/cid@=1111/ic@=icon/sahf@=0/level@=1/nl@=0/col@=0/dlv@=0/dc@=0/bdlv@=0/bnn@=test/bl@=0/brid@=58839/hc@=0/ol@=0/hl@=0/ifs@=0/el@=eid@AA=1@ASetp@AA=1@ASsc@AA=1@AS/";
-		String sample = "type@=chatmsg/rid@=2020877/ct@=2/uid@=21162702/nn@=豆子丶小粉丝/txt@=[emot:dy118][emot:dy118]/cid@=9f5da093f87c4402d0a6000000000000/ic@=avanew@Sface@S201712@S04@S01@S3d4ff644286c1d79c486244599f011f3/level@=28/sahf@=0/nl@=7/col@=4/dlv@=3/dc@=2/bdlv@=3/bnn@=豆霸霸/bl@=15/brid@=2020877/hc@=fe329c65ab6c55c8c8f38e12bb502a41/hl@=1/ifs@=1/el@=/timestamp@=1513585316607/messageId@=638/";
-		testForAllFieldsExist(template, sample);
+		String template = "type@=chatmsg/rid@=58839/uid@=123456/nn@=test/txt@=666/cid@=1111/ic@=icon/sahf@=0/level@=1/bnn@=test/bl@=0/brid@=58839/hc@=0/el@=eid@AA=1@ASetp@AA=1@ASsc@AA=1@AS/";
+		String sample1 = "type@=chatmsg/rid@=2020877/ct@=2/uid@=21162702/nn@=豆子丶小粉丝/txt@=[emot:dy118][emot:dy118]/cid@=9f5da093f87c4402d0a6000000000000/ic@=avanew@Sface@S201712@S04@S01@S3d4ff644286c1d79c486244599f011f3/level@=28/sahf@=0/nl@=7/col@=4/dlv@=3/dc@=2/bdlv@=3/bnn@=豆霸霸/bl@=15/brid@=2020877/hc@=fe329c65ab6c55c8c8f38e12bb502a41/hl@=1/ifs@=1/el@=/timestamp@=1513585316607/messageId@=638/";
+		String sample2 = "type@=chatmsg/rid@=2020877/uid@=9749085/nn@=likaka/txt@=评完可以和小白鸽一起吃鸡/cid@=9f5da093f87c440293ac000000000000/ic@=avanew@Sface@S201612@S18@S20@S1736cb1fbcfa7409a7cd71546e7c710c/level@=8/sahf@=0/bnn@=/bl@=0/brid@=0/hc@=/el@=/timestamp@=1513593371019/messageId@=57/";
+		testForAllFieldsExist(template, sample1);
+		testForAllFieldsExist(template, sample2);
+	}
+	@Test
+	public void goodMessage1_chatmsg(){
+		String sample = "type@=chatmsg/rid@=2020877/ct@=1/uid@=10668500/nn@=纯丶丶粹/txt@=[emot:dy127]/cid@=9f5da093f87c44022aac000000000000/ic@=avanew@Sface@S201706@S15@S03@S50a162ca598c6234be45c196f8ee638d/level@=17/sahf@=0/bnn@=7911/bl@=5/brid@=7911/hc@=73579b20ca765d94dc96e17288e64f64/el@=/timestamp@=1513592565294/messageId@=32/";
+		assertTrue(clientWrapper.isBrokenMessage(sample)==false);
+	}
+	@Test
+	public void goodMessage2_chatmsg(){
+		String sample = "type@=chatmsg/rid@=2020877/uid@=9749085/nn@=likaka/txt@=评完可以和小白鸽一起吃鸡/cid@=9f5da093f87c440293ac000000000000/ic@=avanew@Sface@S201612@S18@S20@S1736cb1fbcfa7409a7cd71546e7c710c/level@=8/sahf@=0/bnn@=/bl@=0/brid@=0/hc@=/el@=/timestamp@=1513593371019/messageId@=57/";
+		assertTrue(clientWrapper.isBrokenMessage(sample)==false);
+	}
+	@Test
+	public void goodMessage1_synexp(){
+		String sample = "type@=synexp/o_exp@=14053053060/o_lev@=91/o_minexp@=13954500000/o_upexp@=801446940/rid@=2020877/timestamp@=1513593136037/messageId@=20/";
+		assertTrue(clientWrapper.isBrokenMessage(sample)==false);
 	}
 	@Test
 	public void isBrokenMessageIfMissingFieldsFor_onlinegift(){

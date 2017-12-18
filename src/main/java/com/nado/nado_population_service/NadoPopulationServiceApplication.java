@@ -33,6 +33,7 @@ public class NadoPopulationServiceApplication {
 		@Override
 		public void run(String... args) throws Exception {
 			client.register(2020877+"");
+			clientWrapper.testAndSaveBrokenMessage();
 			
 //			while(true){
 //				String msg= client.take();
