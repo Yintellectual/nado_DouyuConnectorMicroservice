@@ -5,6 +5,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +31,11 @@ public class NadoPopulationServiceApplication {
 		SpringApplication.run(NadoPopulationServiceApplication.class, args);
 	}
 
+    @Bean(destroyMethod = "shutdown")
+    public Executor taskScheduler() {
+        return Executors.newScheduledThreadPool(5);
+    }
+	
 	@Autowired
 	DouyuDanmuClient client;
 	@Autowired
@@ -39,8 +46,8 @@ public class NadoPopulationServiceApplication {
 		@Override
 		public void run(String... args) throws Exception {
 			//System.out.println(generateSampleRecords());
-			// client.register(2020877+"");
-			// clientWrapper.wrapClient(client);
+			 client.register(2020877+"");
+			 clientWrapper.wrapClient(client);
 
 			// while(true){
 			// String msg= client.take();

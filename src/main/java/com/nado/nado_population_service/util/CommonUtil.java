@@ -1,5 +1,6 @@
 package com.nado.nado_population_service.util;
 
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -55,6 +56,13 @@ public class CommonUtil {
 		return result;
 	}
 	
+	public static LocalDateTime vitualizeDateTime(LocalDateTime now){
+		if(now.toLocalTime().isBefore(LocalTime.of(7, 0))){
+			return now.minus(1, ChronoUnit.DAYS);
+		}else{
+			return now;
+		}
+	}
 	public static Map<String, List<String>> mapOfTypeAndFields = new HashMap<>();
 	static {
 		String[] templates = new String[]{
