@@ -97,6 +97,7 @@ public class DouyuDanmuClientQueueImpl implements DouyuDanmuClient {
 
 	@Override
 	public void register(String room_id) {
+		logout = false;
 		this.room_id = room_id;
 		System.out.println("\n\nRegistering!!!\n\n");
 		if (clientSocket.isClosed()) {
@@ -141,28 +142,33 @@ public class DouyuDanmuClientQueueImpl implements DouyuDanmuClient {
 
 	@Scheduled(cron = "0/45 * * * * *")
 	public void heartbeat() {
-		System.out.println(Thread.currentThread().getName()+":heartbeat");
-		heartBeat.clear();
-		send("type@=mrkl/");
-		String message = "";
-		try {
-			message = heartBeat.poll(5, TimeUnit.SECONDS);
-		} catch (Exception e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+		if (!logout) {
+			System.out.println(Thread.currentThread().getName() + ":heartbeat");
+			heartBeat.clear();
+			send("type@=mrkl/");
+			String message = "";
 			try {
-				clientSocket.close();
-			} catch (IOException e) {
+				message = heartBeat.poll(5, TimeUnit.SECONDS);
+			} catch (Exception e1) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				e1.printStackTrace();
+				try {
+					clientSocket.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				register(room_id);
 			}
-			register(room_id);
 		}
 	}
+
+	private boolean logout = true;
 
 	@Override
 	public void logout() {
 		System.out.println("\n\nLogout!!!\n\n");
+		logout = true;
 		// TODO Auto-generated method stub
 		if (clientSocket.isConnected()) {
 			send("type@=logout/");
@@ -177,18 +183,19 @@ public class DouyuDanmuClientQueueImpl implements DouyuDanmuClient {
 
 	@Scheduled(cron = "* * * * * *")
 	public void getMessage() {
-		
-		System.out.println(Thread.currentThread().getName()+": getMessage");
-		try {
-			reader.read(buffer);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		if (!logout) {
+			//System.out.println(Thread.currentThread().getName() + ": getMessage");
+			try {
+				reader.read(buffer);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			spliteAndDecorateMessages(new String(buffer)).forEach(str -> {
+				messages.offer(str);
+			});
+			Arrays.fill(buffer, (char) 0);
 		}
-		spliteAndDecorateMessages(new String(buffer)).forEach(str -> {
-			messages.offer(str);
-		});
-		Arrays.fill(buffer, (char) 0);
 	}
 
 	@Override
@@ -226,8 +233,8 @@ public class DouyuDanmuClientQueueImpl implements DouyuDanmuClient {
 	}
 
 	private List<String> spliteAndDecorateMessages(String rawMessage) {
-		System.out.println(rawMessage.trim());
-		if(rawMessage.contains("type@=mrkl/")){
+		//System.out.println(rawMessage.trim());
+		if (rawMessage.contains("type@=mrkl/")) {
 			try {
 				heartBeat.put("/type@=mrkl/");
 			} catch (InterruptedException e) {

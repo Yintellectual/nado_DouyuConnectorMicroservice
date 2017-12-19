@@ -48,7 +48,11 @@ public class NadoPopulationServiceApplication {
 			//System.out.println(generateSampleRecords());
 			 client.register(2020877+"");
 			 clientWrapper.wrapClient(client);
-
+			 Thread.sleep(10000);
+			 System.out.println("\n\n!!!!!!!!!!!!!!!!!logout");
+			 client.logout();
+			 Thread.sleep(10000);
+			 client.register(2020877+"");
 			// while(true){
 			// String msg= client.take();
 			// if(msg.contains("respond")){

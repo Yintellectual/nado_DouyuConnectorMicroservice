@@ -102,10 +102,12 @@ public class DouyuDanmuBrokenMessageFilterNaiveImpl implements DouyuDanmuBrokenM
 	}
 
 	public void wrapClient(DouyuDanmuClient client){
-		while(true){
-			String message = client.take();
-			testAndSaveBrokenMessage(message);
-		}
+		new Thread(()->{
+			while(true){
+				String message = client.take();
+				testAndSaveBrokenMessage(message);
+			}	
+		}).start();
 	}
 	
 	/*
