@@ -1,7 +1,11 @@
 package com.nado.nado_population_service.util;
 
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -36,6 +40,17 @@ public class CommonUtil {
 		Matcher matcher = pattern.matcher(template);
 		while (matcher.find()) {
 			result.add(matcher.group(1));
+		}
+		return result;
+	}
+	
+	public static Map<String, String> generateSampleRecords(){
+		Map<String, String> result = new LinkedHashMap<>();
+		LocalTime time = LocalTime.of(7, 0);
+		for(int i=0;i<288;i++){
+			String timeString = time.format(DateTimeFormatter.ofPattern("HH:mm"));
+			time = time.plus(5,ChronoUnit.MINUTES);
+			result.put(timeString, ""+i);
 		}
 		return result;
 	}

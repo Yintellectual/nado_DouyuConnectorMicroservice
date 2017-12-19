@@ -38,6 +38,7 @@ public class NadoPopulationServiceApplication {
 	public class MyRunner implements CommandLineRunner {
 		@Override
 		public void run(String... args) throws Exception {
+			//System.out.println(generateSampleRecords());
 			// client.register(2020877+"");
 			// clientWrapper.wrapClient(client);
 
