@@ -109,8 +109,10 @@ public class DouyuDanmuClientQueueImpl implements DouyuDanmuClient {
 			do {
 				message = take();
 				if (message.contains("loginres")) {
+					messages.offer(message);
 					break;
 				}
+				
 			} while (true);
 			send("type@=joingroup/rid@=" + room_id + "/gid@=-9999/");
 			System.out.println("\n\nRegistered!!!\n\n");
@@ -184,7 +186,7 @@ public class DouyuDanmuClientQueueImpl implements DouyuDanmuClient {
 	private List<String> spliteAndDecorateMessages(String rawMessage) {
 		String[] splitedRawMessage = (rawMessage.trim()).split(new String(new char[] {(char)0}));
 		return Arrays.asList(splitedRawMessage).stream().filter(str -> str.contains("type"))
-				.map(str -> str + "timestamp@=" + new Date().getTime() + "/messageId@=" + newMessageId() + "/")
+				.map(str -> "/timestamp@=" + new Date().getTime() + "/messageId@=" + newMessageId() + "/"+str)
 				.collect(Collectors.toList());
 	}
 }

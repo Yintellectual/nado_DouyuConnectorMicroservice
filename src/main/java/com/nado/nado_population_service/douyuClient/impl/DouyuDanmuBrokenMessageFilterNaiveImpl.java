@@ -22,8 +22,6 @@ import static com.nado.nado_population_service.util.CommonUtil.*;
 @Service
 public class DouyuDanmuBrokenMessageFilterNaiveImpl implements DouyuDanmuBrokenMessageFilter {
 
-	@Autowired
-	DouyuDanmuClient client;
 	@Override
 	public Map<String, Integer> getTraffic5minutesRecords() {
 		// TODO Auto-generated method stub
@@ -48,48 +46,60 @@ public class DouyuDanmuBrokenMessageFilterNaiveImpl implements DouyuDanmuBrokenM
 		return null;
 	}
 
+	/*
+	 * 1 = not ends with '/'
+	 * 2 = missing type
+	 * 3 = multiple type
+	 * 4 = missing fields
+	 * -1 = false(good message) 
+	 * */
 	@Override
-	public boolean isBrokenMessage(String message) {
+	public int isBrokenMessage(String message) {
 		if (!message.endsWith("/")) {
-			return true;
+			return 1;
 		}
-		if (!message.contains("type")) {
-			return true;
-		}
-		if (message.matches(".*type.*type.*")) {
-			return true;
+		if (message.matches(".*/type@=.*/type@=.*")) {
+			return 3;
 		}
 		String type = matchStringValue(message, "type");
-		if(mapOfTypeAndFields.containsKey(type)){
+		if (mapOfTypeAndFields.containsKey(type)) {
 			for (String field : mapOfTypeAndFields.get(type)) {
 				if (!message.contains(field)) {
-					return true;
+					return 4;
 				}
 			}
-			return false;	
-		}else{
-			return true;
+			return -1;
+		} else {
+			System.out.println("\n\n\n\n!!!!!!"+message);
+			System.out.println("\n\n\n\n!!!!!!"+type);
+			return 2;
 		}
 	}
 
-	@Override
-	public void testAndSaveBrokenMessage() {
-		// TODO Auto-generated method stub
+	public void wrapClient(DouyuDanmuClient client){
 		while(true){
 			String message = client.take();
-			if(isBrokenMessage(message)){
-				try {
-					Files.write(Paths.get("c:/nado/output.txt"), (message+"\n").getBytes(), StandardOpenOption.APPEND);
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				
-				System.out.println("\n\nBROKEN: "+message);
-				
-			}else{
-				System.out.println("\n\nGood: "+matchStringValue(message, "type"));
+			testAndSaveBrokenMessage(message);
+		}
+	}
+	
+	/*
+	 * Has the side-effect of updating both the traffic and the broken message rate
+	 * */
+	@Override
+	public void testAndSaveBrokenMessage(String message) {
+		// TODO Auto-generated method stub
+		if (isBrokenMessage(message)==0) {
+			try {
+				Files.write(Paths.get("c:/nado/brokenMessage.txt"), (message + "\n").getBytes(), StandardOpenOption.APPEND);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
+			System.out.println("\n\nBROKEN: " + message);
+
+		} else {
+			System.out.println("\n\nGood: " + matchStringValue(message, "type"));
 		}
 	}
 
