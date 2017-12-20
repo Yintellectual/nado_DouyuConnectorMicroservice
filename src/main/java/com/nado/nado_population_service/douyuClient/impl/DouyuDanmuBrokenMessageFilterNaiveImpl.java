@@ -30,8 +30,8 @@ public class DouyuDanmuBrokenMessageFilterNaiveImpl implements DouyuDanmuBrokenM
 	Daily5MinuteTrafficReportRepository daily5MinuteTrafficReportRepository;
 	private int olderBrokenMessageCount = 0;
 	private int brokenMessageCount = 0;
-	private int olderLatestMessageId = 0;
-	private int latestMessageId = 0;
+	private int olderTotalMessageCount= 0;
+	private int totalMessageCount = 0;
 	@Override
 	public Map<String, Integer> getTraffic5minutesRecords() {
 		// TODO Auto-generated method stub
@@ -58,18 +58,22 @@ public class DouyuDanmuBrokenMessageFilterNaiveImpl implements DouyuDanmuBrokenM
 
 	@Scheduled(cron="0 0/5 * * * *")
 	public void heartbeatEvery5Minutes(){
-		saveRecord();
-	}
-	public String saveRecord(){
-		String total_message_count = ""+(latestMessageId-olderLatestMessageId);
-		olderLatestMessageId = latestMessageId;
-		String broken_message_count = ""+(brokenMessageCount-olderBrokenMessageCount);
-		olderBrokenMessageCount = brokenMessageCount;
+		String total_message_count = renewTrafficRecord()+"";
+		String broken_message_count = renewBrokenRecord()+"";
 		LocalDateTime now = vitualizeDateTime(LocalDateTime.now());
 		String date = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 		String time = now.format(DateTimeFormatter.ofPattern("HH:mm"));
 		daily5MinuteTrafficReportRepository.saveRecord(date, time, total_message_count, broken_message_count);
+	}
+	public int renewTrafficRecord(){
+		int total_message_count = totalMessageCount-olderTotalMessageCount;
+		olderTotalMessageCount = totalMessageCount;
 		return total_message_count;
+	}
+	public int renewBrokenRecord(){
+		int broken_message_count = brokenMessageCount-olderBrokenMessageCount;
+		olderBrokenMessageCount = brokenMessageCount;
+		return broken_message_count;
 	}
 	/*
 	 * 1 = not ends with '/'
@@ -116,7 +120,7 @@ public class DouyuDanmuBrokenMessageFilterNaiveImpl implements DouyuDanmuBrokenM
 	@Override
 	public void testAndSaveBrokenMessage(String message) {
 		// TODO Auto-generated method stub
-		latestMessageId = Integer.parseInt(matchDigitalValue(message, "messageId"));
+		totalMessageCount++;
 		if (isBrokenMessage(message)>0) {
 			brokenMessageCount++;
 			try {
@@ -128,7 +132,7 @@ public class DouyuDanmuBrokenMessageFilterNaiveImpl implements DouyuDanmuBrokenM
 			System.out.println("\n\nBROKEN: " + message);
 
 		} else {
-			System.out.println("\n\nlatestMessageId:"+olderLatestMessageId+"  brokenMessageCount:"+olderBrokenMessageCount+"Good: " + matchStringValue(message, "type"));
+			System.out.println("\n\nlatestMessageId:"+totalMessageCount+"  brokenMessageCount:"+brokenMessageCount+"Good: " + matchStringValue(message, "type"));
 		}
 	}
 

@@ -66,6 +66,7 @@ public class CommonUtil {
 	public static Map<String, List<String>> mapOfTypeAndFields = new HashMap<>();
 	static {
 		String[] templates = new String[]{
+				"/timestamp@=1513727757027/messageId@=11/type@=loginres/userid@=0/roomgroup@=0/pg@=0/sessionid@=0/username@=/nickname@=/live_stat@=0/is_illegal@=0/ill_ct@=/ill_ts@=0/now@=0/ps@=0/es@=0/it@=0/its@=0/npv@=0/best_dlev@=0/cur_lev@=0/nrc@=2098404416/ih@=0/sid@=72963/sahf@=0/",
 				"/type@=chatmsg/rid@=58839/uid@=123456/nn@=test/txt@=666/cid@=1111/ic@=icon/sahf@=0/level@=1/bnn@=test/bl@=0/brid@=58839/hc@=0/el@=eid@AA=1@ASetp@AA=1@ASsc@AA=1@AS/",
 				"/type@=onlinegift/rid@=1/uid@=1/gid@=-9999/sil@=1/if@=1/ct@=1/nn@=tester/ur@=1/level@=6/btype@=1/",
 				"/type@=dgb/gfid@=1/gs@=59872/uid@=1/rid@=1/nn@=someone/level@=1/dw@=1/",

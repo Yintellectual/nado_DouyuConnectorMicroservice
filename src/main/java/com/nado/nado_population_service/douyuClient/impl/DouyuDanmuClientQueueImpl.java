@@ -98,6 +98,12 @@ public class DouyuDanmuClientQueueImpl implements DouyuDanmuClient {
 	@Override
 	public void register(String room_id) {
 		logout = false;
+		try {
+			Thread.sleep(1100);
+		} catch (InterruptedException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		this.room_id = room_id;
 		System.out.println("\n\nRegistering!!!\n\n");
 		if (clientSocket.isClosed()) {

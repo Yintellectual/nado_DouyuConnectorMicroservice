@@ -10,6 +10,8 @@ public interface DouyuDanmuBrokenMessageFilter {
 	Map<String, Integer> getBrokenMessage5minutesRecords();
 	Map<String, Integer> getTrafficDailyRecords();
 	Map<String, Integer> getBrokenMessageDailyRecords();
+	int renewTrafficRecord();
+	int renewBrokenRecord();
 	int isBrokenMessage(String message);
 	void testAndSaveBrokenMessage(String message);
 	List<String> getBrokenMessages(String type);
