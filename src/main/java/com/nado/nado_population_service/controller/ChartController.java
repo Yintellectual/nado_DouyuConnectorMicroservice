@@ -1,5 +1,9 @@
 package com.nado.nado_population_service.controller;
 
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +18,7 @@ import com.nado.nado_population_service.controller.entity.ChartData2D2DataSets;
 import com.nado.nado_population_service.douyuClient.DouyuDanmuBrokenMessageFilter;
 import com.nado.nado_population_service.douyuClient.repository.Daily5MinuteTrafficReportRepository;
 import com.nado.nado_population_service.douyuClient.repository.SampleMessageRepository;
+import com.nado.nado_population_service.util.CommonUtil;
 
 
 @Controller
@@ -44,17 +49,21 @@ public class ChartController {
 	@RequestMapping("/api/chartjs/trafficDataOfToday")
 	@ResponseBody
 	public ChartData2D2DataSets trafficDataOfToday(){
+		LocalDateTime now = LocalDateTime.now();
+		String date = CommonUtil.vitualizeDateTime(now).format(DateTimeFormatter.ofPattern("yyyy-MM-ss"));
 		return ChartData2D2DataSets.fromMap(
-				clientWrapper.getTotalMessageRecordsByDate("2017-12-21"),
-				clientWrapper.getBrokenMessageRecordsByDate("2017-12-21"),
+				clientWrapper.getTotalMessageRecordsByDate(date),
+				clientWrapper.getBrokenMessageRecordsByDate(date),
 				"rgba(100,100,100,0.5)");
 	}
 	@RequestMapping("/api/chartjs/trafficDataOfYesterday")
 	@ResponseBody
 	public ChartData2D2DataSets trafficDataOfYesterday(){
+		LocalDateTime now = LocalDateTime.now();
+		String date = CommonUtil.vitualizeDateTime(now).minus(1, ChronoUnit.DAYS).format(DateTimeFormatter.ofPattern("yyyy-MM-ss"));
 		return ChartData2D2DataSets.fromMap(
-				clientWrapper.getTotalMessageRecordsByDate("2017-12-19"),
-				clientWrapper.getBrokenMessageRecordsByDate("2017-12-19"),
+				clientWrapper.getTotalMessageRecordsByDate(date),
+				clientWrapper.getBrokenMessageRecordsByDate(date),
 				"rgba(100,100,100,0.5)");
 	}
 	@RequestMapping("/api/chartjs/trafficDataByDate")
