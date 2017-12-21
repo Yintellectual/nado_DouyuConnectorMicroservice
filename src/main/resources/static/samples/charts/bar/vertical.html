@@ -74,7 +74,7 @@
 				function() {
 					//get data from restAPI
 					$.ajax({
-						url : "http://localhost:8084/test2"
+						url : "/api/chartjs/trafficDataOfToday/"
 					}).then(function(data) {
 						var zero = Math.random() < 0.2 ? true : false;
 						barChartData.labels = data.labels;

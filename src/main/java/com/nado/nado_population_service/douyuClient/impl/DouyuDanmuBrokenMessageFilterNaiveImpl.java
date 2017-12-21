@@ -8,7 +8,9 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -20,6 +22,7 @@ import org.springframework.stereotype.Service;
 import com.nado.nado_population_service.douyuClient.DouyuDanmuBrokenMessageFilter;
 import com.nado.nado_population_service.douyuClient.DouyuDanmuClient;
 import com.nado.nado_population_service.douyuClient.repository.Daily5MinuteTrafficReportRepository;
+import com.nado.nado_population_service.enums.TrafficReportField;
 
 import static com.nado.nado_population_service.util.CommonUtil.*;
 
@@ -30,58 +33,63 @@ public class DouyuDanmuBrokenMessageFilterNaiveImpl implements DouyuDanmuBrokenM
 	Daily5MinuteTrafficReportRepository daily5MinuteTrafficReportRepository;
 	private int olderBrokenMessageCount = 0;
 	private int brokenMessageCount = 0;
-	private int olderTotalMessageCount= 0;
+	private Map<String, String> latestBrokenMessageRecord = null;
+	private int olderTotalMessageCount = 0;
 	private int totalMessageCount = 0;
+	private Map<String, String> latestTotalMessageRecord = null;
+
 	@Override
-	public Map<String, Integer> getTraffic5minutesRecords() {
+	public Map<String, String> getLatest5minutesTotalMessageRecord() {
 		// TODO Auto-generated method stub
-		return null;
+		return latestTotalMessageRecord;
 	}
 
 	@Override
-	public Map<String, Integer> getBrokenMessage5minutesRecords() {
+	public Map<String, String> getLatest5minutesBrokenMessageRecord() {
 		// TODO Auto-generated method stub
-		return null;
+		return latestBrokenMessageRecord;
 	}
 
 	@Override
-	public Map<String, Integer> getTrafficDailyRecords() {
+	public LinkedHashMap<String, String> getTotalMessageRecordsByDate(String date) {
 		// TODO Auto-generated method stub
-		return null;
+		return daily5MinuteTrafficReportRepository.retieveRecordByDate(date, TrafficReportField.total_message_count);
 	}
 
 	@Override
-	public Map<String, Integer> getBrokenMessageDailyRecords() {
+	public LinkedHashMap<String, String> getBrokenMessageRecordsByDate(String date) {
 		// TODO Auto-generated method stub
-		return null;
+		return daily5MinuteTrafficReportRepository.retieveRecordByDate(date, TrafficReportField.broken_message_count);
 	}
 
-	@Scheduled(cron="0 0/5 * * * *")
-	public void heartbeatEvery5Minutes(){
-		String total_message_count = renewTrafficRecord()+"";
-		String broken_message_count = renewBrokenRecord()+"";
+	@Scheduled(cron = "0 0/5 * * * *")
+	public void heartbeatEvery5Minutes() {
+		String total_message_count = renewTrafficRecord() + "";
+		String broken_message_count = renewBrokenRecord() + "";
 		LocalDateTime now = vitualizeDateTime(LocalDateTime.now());
 		String date = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 		String time = now.format(DateTimeFormatter.ofPattern("HH:mm"));
 		daily5MinuteTrafficReportRepository.saveRecord(date, time, total_message_count, broken_message_count);
+		latestTotalMessageRecord = Collections.singletonMap(date+" "+time, total_message_count);
+		latestBrokenMessageRecord = Collections.singletonMap(date+" "+time, broken_message_count);
 	}
-	public int renewTrafficRecord(){
-		int total_message_count = totalMessageCount-olderTotalMessageCount;
+
+	public int renewTrafficRecord() {
+		int total_message_count = totalMessageCount - olderTotalMessageCount;
 		olderTotalMessageCount = totalMessageCount;
 		return total_message_count;
 	}
-	public int renewBrokenRecord(){
-		int broken_message_count = brokenMessageCount-olderBrokenMessageCount;
+
+	public int renewBrokenRecord() {
+		int broken_message_count = brokenMessageCount - olderBrokenMessageCount;
 		olderBrokenMessageCount = brokenMessageCount;
 		return broken_message_count;
 	}
+
 	/*
-	 * 1 = not ends with '/'
-	 * 2 = missing type
-	 * 3 = multiple type
-	 * 4 = missing fields
-	 * -1 = false(good message) 
-	 * */
+	 * 1 = not ends with '/' 2 = missing type 3 = multiple type 4 = missing
+	 * fields -1 = false(good message)
+	 */
 	@Override
 	public int isBrokenMessage(String message) {
 		if (!message.endsWith("/")) {
@@ -99,32 +107,34 @@ public class DouyuDanmuBrokenMessageFilterNaiveImpl implements DouyuDanmuBrokenM
 			}
 			return -1;
 		} else {
-			System.out.println("\n\n\n\n!!!!!!"+message);
-			System.out.println("\n\n\n\n!!!!!!"+type);
+			System.out.println("\n\n\n\n!!!!!!" + message);
+			System.out.println("\n\n\n\n!!!!!!" + type);
 			return 2;
 		}
 	}
 
-	public void wrapClient(DouyuDanmuClient client){
-		new Thread(()->{
-			while(true){
+	public void wrapClient(DouyuDanmuClient client) {
+		new Thread(() -> {
+			while (true) {
 				String message = client.take();
 				testAndSaveBrokenMessage(message);
-			}	
+			}
 		}).start();
 	}
-	
+
 	/*
-	 * Has the side-effect of updating both the traffic and the broken message rate
-	 * */
+	 * Has the side-effect of updating both the traffic and the broken message
+	 * rate
+	 */
 	@Override
 	public void testAndSaveBrokenMessage(String message) {
 		// TODO Auto-generated method stub
 		totalMessageCount++;
-		if (isBrokenMessage(message)>0) {
+		if (isBrokenMessage(message) > 0) {
 			brokenMessageCount++;
 			try {
-				Files.write(Paths.get("c:/nado/brokenMessage.txt"), (message + "\n").getBytes(), StandardOpenOption.APPEND, StandardOpenOption.CREATE);
+				Files.write(Paths.get("c:/nado/brokenMessage.txt"), (message + "\n").getBytes(),
+						StandardOpenOption.APPEND, StandardOpenOption.CREATE);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -132,7 +142,8 @@ public class DouyuDanmuBrokenMessageFilterNaiveImpl implements DouyuDanmuBrokenM
 			System.out.println("\n\nBROKEN: " + message);
 
 		} else {
-			System.out.println("\n\nlatestMessageId:"+totalMessageCount+"  brokenMessageCount:"+brokenMessageCount+"Good: " + matchStringValue(message, "type"));
+			System.out.println("\n\nlatestMessageId:" + totalMessageCount + "  brokenMessageCount:" + brokenMessageCount
+					+ "Good: " + matchStringValue(message, "type"));
 		}
 	}
 

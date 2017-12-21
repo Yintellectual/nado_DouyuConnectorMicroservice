@@ -7,6 +7,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -53,6 +54,49 @@ public class CommonUtil {
 			time = time.plus(5,ChronoUnit.MINUTES);
 			result.put(timeString, ""+i);
 		}
+		return result;
+	}
+	public static LinkedHashMap<String, String> sortTrafficRecordByTimeOrder(Map<String, String> raw){
+		System.out.println("\n\n\n\n\n!!!!!!!!!!!!!!!!!!!"+raw);
+		LinkedHashMap<String, String> result = new LinkedHashMap<>();
+		LocalTime initTime = LocalTime.of(7, 0);
+		DateTimeFormatter pattern = DateTimeFormatter.ofPattern("HH:mm");
+		List<LocalTime> listOfKeys = new LinkedList<>();
+		for(String rawKeyString:raw.keySet()){
+			LocalTime rawKeyTime = LocalTime.parse(rawKeyString, pattern);
+			listOfKeys.add(rawKeyTime);
+		}
+		listOfKeys.sort((a,b)->{
+			if(a.isAfter(initTime)&&(b.isAfter(initTime))){
+				return a.compareTo(b);
+			}else if(a.isBefore(initTime)&&(b.isBefore(initTime))){
+				return a.compareTo(b);
+			}else if(a.isAfter(initTime)&&(b.isBefore(initTime))){
+				return -1;
+			}else if(a.isBefore(initTime)&&(b.isAfter(initTime))){
+				return 1;
+			}else if(a.equals(initTime)){
+				if(b.isBefore(initTime)){
+					return 1;
+				}else{
+					return -1;
+				}
+			}else if(b.equals(initTime)){
+				if(a.isBefore(initTime)){
+					return -1;
+				}else{
+					return 1;
+				}
+			}else if(a.equals(initTime)&&b.equals(initTime)){
+				return 0;
+			}else{
+				throw new RuntimeException();
+			}
+		});
+		listOfKeys.forEach(time->{
+			String key = time.format(pattern);
+			result.put(key, raw.get(key));	
+		});
 		return result;
 	}
 	

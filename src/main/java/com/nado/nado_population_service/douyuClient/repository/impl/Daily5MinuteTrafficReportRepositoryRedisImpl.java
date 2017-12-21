@@ -1,5 +1,7 @@
 package com.nado.nado_population_service.douyuClient.repository.impl;
 
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import com.nado.nado_population_service.douyuClient.repository.Daily5MinuteTrafficReportRepository;
 import com.nado.nado_population_service.enums.TrafficReportField;
+import com.nado.nado_population_service.util.CommonUtil;
 
 @Service
 public class Daily5MinuteTrafficReportRepositoryRedisImpl implements Daily5MinuteTrafficReportRepository {
@@ -42,9 +45,10 @@ public class Daily5MinuteTrafficReportRepositoryRedisImpl implements Daily5Minut
 	}
 
 	@Override
-	public Map<String, String> retieveRecordByDate(String date, TrafficReportField field) {
+	public LinkedHashMap <String, String> retieveRecordByDate(String date, TrafficReportField field) {
 		// TODO Auto-generated method stub
-		return hashOperations.entries("nado:"+field+":date:"+date);
+		Map<String, String> data = hashOperations.entries("nado:"+field+":date:"+date);
+		return CommonUtil.sortTrafficRecordByTimeOrder(data);
 	}
 
 	@Override
@@ -55,5 +59,4 @@ public class Daily5MinuteTrafficReportRepositoryRedisImpl implements Daily5Minut
 			stringRedisTemplate.delete("nado:"+field+":date:"+date);	
 		}
 	}
-
 }

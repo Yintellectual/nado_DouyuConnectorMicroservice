@@ -46,8 +46,8 @@ public class NadoPopulationServiceApplication {
 		@Override
 		public void run(String... args) throws Exception {
 			//System.out.println(generateSampleRecords());
-//			 client.register(2020877+"");
-//			 clientWrapper.wrapClient(client);
+			 client.register(2020877+"");
+			 clientWrapper.wrapClient(client);
 //			 Thread.sleep(10000);
 //			 System.out.println("\n\n!!!!!!!!!!!!!!!!!logout");
 //			 client.logout();
