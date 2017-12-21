@@ -1,7 +1,10 @@
 package com.nado.nado_population_service.douyuClient.repository.impl;
 
 import java.io.IOException;
+import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.HashMap;
@@ -17,6 +20,7 @@ import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.SetOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+
 
 import com.nado.nado_population_service.douyuClient.repository.SampleMessageRepository;
 import com.nado.nado_population_service.enums.MessageIntegrityStatuses;
@@ -68,6 +72,17 @@ public class SampleMessageRepositoryImpl implements SampleMessageRepository {
 				for(String type:types){
 					List<String> messages = retieveSamplesByType(type, statuse);
 					String fileName = statuse+"_"+type+"_sample_messages.txt";
+					Path path = Paths.get(fileName);
+					try {
+						Files.delete(path);
+					}catch (NoSuchFileException x) {
+					    System.err.format("%s: no such" + " file or directory%n", path);
+					} catch (DirectoryNotEmptyException x) {
+					    System.err.format("%s not empty%n", path);
+					} catch (IOException x) {
+					    // File permission problems are caught here.
+					    System.err.println(x);
+					}
 					result.put(fileName, messages);
 					messages.forEach(message->{
 						try {

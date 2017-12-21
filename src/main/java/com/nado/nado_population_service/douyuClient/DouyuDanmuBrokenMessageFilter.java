@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.Set;
 import com.nado.nado_population_service.douyuClient.DouyuDanmuClient;
 public interface DouyuDanmuBrokenMessageFilter {
-	Set<String> everEncounteredTypes();
 	Map<String, String> getLatest5minutesTotalMessageRecord();
 	Map<String, String> getLatest5minutesBrokenMessageRecord();
 	LinkedHashMap<String, String> getTotalMessageRecordsByDate(String date);
@@ -15,7 +14,7 @@ public interface DouyuDanmuBrokenMessageFilter {
 	int renewBrokenRecord();
 	int isBrokenMessage(String message);
 	void testAndSaveBrokenMessage(String message);
-	List<String> getBrokenMessages(String type);
-	String take();
+	
+	String publish(String type, String message);
 	public void wrapClient(DouyuDanmuClient client);
 }

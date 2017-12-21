@@ -118,6 +118,7 @@ public class DouyuDanmuBrokenMessageFilterNaiveImpl implements DouyuDanmuBrokenM
 		if(result>0){
 			sampleMessageRepository.saveSample(message, type, MessageIntegrityStatuses.broken);
 		}else if(result<0){
+			publish(type, message);
 			sampleMessageRepository.saveSample(message, type, MessageIntegrityStatuses.good);
 		}else{
 			throw new RuntimeException();
@@ -153,21 +154,12 @@ public class DouyuDanmuBrokenMessageFilterNaiveImpl implements DouyuDanmuBrokenM
 		}
 	}
 
+	
 	@Override
-	public List<String> getBrokenMessages(String type) {
+	public String publish(String type, String message) {
 		// TODO Auto-generated method stub
-		return null;
+		return message;
 	}
 
-	@Override
-	public String take() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Set<String> everEncounteredTypes() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	
 }
