@@ -150,7 +150,7 @@ public class CommonUtil {
 				"/timestamp@=1513611088023/messageId@=123772/type@=anbc/rid@=2020877/gid@=0/bt@=2/uid@=37216637/hrp@=0/unk@=南风之环/uic@=avatar@S037@S21@S66@S37_avatar/drid@=2020877/donk@=纳豆nado/nl@=7/ts@=1513611088/",
 				"/timestamp@=1513605013041/messageId@=28028/roomset@=/catelv1@=/catelv2@=/type@=task_qmyq/rid@=2020877/ftype@=0/fid@=87146/ktfid@=0/uid@=26229649/aid@=128027279/tn@=能不能让骑士团热一下.../sn@=独占大脑阔/gfid@=191/gfc@=60/",
 				"/timestamp@=1513607382019/messageId@=69985/roomset@=/catelv1@=/catelv2@=/ftype@=0/tuid@=0/rid@=2020877/type@=rtmp60/nickname@=豆霸霸丶影流/share@=截取了主播的/topic_name@=/",
-
+				"/timestamp@=1513819868038/messageId@=4/type@=noble_num_info/sum@=29/list@=lev@AA=3@ASnum@AA=3@AS@Slev@AA=2@ASnum@AA=1@AS@Slev@AA=1@ASnum@AA=6@AS@Slev@AA=7@ASnum@AA=19@AS@S/rid@=2020877/",
 				
 		};
 		for(String template:templates){

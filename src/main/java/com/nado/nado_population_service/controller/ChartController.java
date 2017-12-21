@@ -47,8 +47,8 @@ public class ChartController {
 	@ResponseBody
 	public ChartData2D2DataSets trafficDataOfToday(){
 		return ChartData2D2DataSets.fromMap(
-				clientWrapper.getTotalMessageRecordsByDate("2017-12-20"),
-				clientWrapper.getBrokenMessageRecordsByDate("2017-12-20"),
+				clientWrapper.getTotalMessageRecordsByDate("2017-12-21"),
+				clientWrapper.getBrokenMessageRecordsByDate("2017-12-21"),
 				"rgba(100,100,100,0.5)");
 	}
 	@RequestMapping("/api/chartjs/trafficDataOfYesterday")
