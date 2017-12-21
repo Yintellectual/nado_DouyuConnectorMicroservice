@@ -69,7 +69,7 @@ public class DouyuDanmuBrokenMessageFilterNaiveImpl implements DouyuDanmuBrokenM
 	public void heartbeatEvery5Minutes() {
 		String total_message_count = renewTrafficRecord() + "";
 		String broken_message_count = renewBrokenRecord() + "";
-		LocalDateTime now = vitualizeDateTime(LocalDateTime.now());
+		LocalDateTime now = virtualizeDateTime(LocalDateTime.now());
 		String date = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 		String time = now.format(DateTimeFormatter.ofPattern("HH:mm"));
 		daily5MinuteTrafficReportRepository.saveRecord(date, time, total_message_count, broken_message_count);

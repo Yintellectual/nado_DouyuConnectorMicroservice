@@ -50,7 +50,7 @@ public class ChartController {
 	@ResponseBody
 	public ChartData2D2DataSets trafficDataOfToday(){
 		LocalDateTime now = LocalDateTime.now();
-		String date = CommonUtil.vitualizeDateTime(now).format(DateTimeFormatter.ofPattern("yyyy-MM-ss"));
+		String date = CommonUtil.getvirtualizedDate(now);
 		return ChartData2D2DataSets.fromMap(
 				clientWrapper.getTotalMessageRecordsByDate(date),
 				clientWrapper.getBrokenMessageRecordsByDate(date),
@@ -60,7 +60,7 @@ public class ChartController {
 	@ResponseBody
 	public ChartData2D2DataSets trafficDataOfYesterday(){
 		LocalDateTime now = LocalDateTime.now();
-		String date = CommonUtil.vitualizeDateTime(now).minus(1, ChronoUnit.DAYS).format(DateTimeFormatter.ofPattern("yyyy-MM-ss"));
+		String date = CommonUtil.getvirtualizedDate(now.minus(1, ChronoUnit.DAYS));
 		return ChartData2D2DataSets.fromMap(
 				clientWrapper.getTotalMessageRecordsByDate(date),
 				clientWrapper.getBrokenMessageRecordsByDate(date),
