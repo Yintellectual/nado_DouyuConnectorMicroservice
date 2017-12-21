@@ -22,7 +22,8 @@ import org.springframework.stereotype.Service;
 import com.nado.nado_population_service.douyuClient.DouyuDanmuBrokenMessageFilter;
 import com.nado.nado_population_service.douyuClient.DouyuDanmuClient;
 import com.nado.nado_population_service.douyuClient.repository.Daily5MinuteTrafficReportRepository;
-import com.nado.nado_population_service.enums.TrafficReportField;
+import com.nado.nado_population_service.douyuClient.repository.SampleMessageRepository;
+import com.nado.nado_population_service.enums.MessageIntegrityStatuses;
 
 import static com.nado.nado_population_service.util.CommonUtil.*;
 
@@ -31,6 +32,8 @@ public class DouyuDanmuBrokenMessageFilterNaiveImpl implements DouyuDanmuBrokenM
 
 	@Autowired
 	Daily5MinuteTrafficReportRepository daily5MinuteTrafficReportRepository;
+	@Autowired
+	SampleMessageRepository sampleMessageRepository;
 	private int olderBrokenMessageCount = 0;
 	private int brokenMessageCount = 0;
 	private Map<String, String> latestBrokenMessageRecord = null;
@@ -53,13 +56,13 @@ public class DouyuDanmuBrokenMessageFilterNaiveImpl implements DouyuDanmuBrokenM
 	@Override
 	public LinkedHashMap<String, String> getTotalMessageRecordsByDate(String date) {
 		// TODO Auto-generated method stub
-		return daily5MinuteTrafficReportRepository.retieveRecordByDate(date, TrafficReportField.total_message_count);
+		return daily5MinuteTrafficReportRepository.retieveRecordByDate(date, MessageIntegrityStatuses.total);
 	}
 
 	@Override
 	public LinkedHashMap<String, String> getBrokenMessageRecordsByDate(String date) {
 		// TODO Auto-generated method stub
-		return daily5MinuteTrafficReportRepository.retieveRecordByDate(date, TrafficReportField.broken_message_count);
+		return daily5MinuteTrafficReportRepository.retieveRecordByDate(date, MessageIntegrityStatuses.broken);
 	}
 
 	@Scheduled(cron = "0 0/5 * * * *")
@@ -92,25 +95,34 @@ public class DouyuDanmuBrokenMessageFilterNaiveImpl implements DouyuDanmuBrokenM
 	 */
 	@Override
 	public int isBrokenMessage(String message) {
+		int result = 0;
 		if (!message.endsWith("/")) {
-			return 1;
+			result = 1;
 		}
 		if (message.matches(".*/type@=.*/type@=.*")) {
-			return 3;
+			result = 3;
 		}
 		String type = matchStringValue(message, "type");
 		if (mapOfTypeAndFields.containsKey(type)) {
 			for (String field : mapOfTypeAndFields.get(type)) {
 				if (!message.contains(field)) {
-					return 4;
+					result = 4;
 				}
 			}
-			return -1;
+			result = -1;
 		} else {
 			System.out.println("\n\n\n\n!!!!!!" + message);
 			System.out.println("\n\n\n\n!!!!!!" + type);
-			return 2;
+			result = 2;
 		}
+		if(result>0){
+			sampleMessageRepository.saveSample(message, type, MessageIntegrityStatuses.broken);
+		}else if(result<0){
+			sampleMessageRepository.saveSample(message, type, MessageIntegrityStatuses.good);
+		}else{
+			throw new RuntimeException();
+		}
+		return result;
 	}
 
 	public void wrapClient(DouyuDanmuClient client) {
@@ -132,13 +144,7 @@ public class DouyuDanmuBrokenMessageFilterNaiveImpl implements DouyuDanmuBrokenM
 		totalMessageCount++;
 		if (isBrokenMessage(message) > 0) {
 			brokenMessageCount++;
-			try {
-				Files.write(Paths.get("c:/nado/brokenMessage.txt"), (message + "\n").getBytes(),
-						StandardOpenOption.APPEND, StandardOpenOption.CREATE);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			
 			System.out.println("\n\nBROKEN: " + message);
 
 		} else {

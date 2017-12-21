@@ -1,6 +1,7 @@
 package com.nado.nado_population_service.controller;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,24 +13,21 @@ import com.nado.nado_population_service.controller.entity.ChartData2D;
 import com.nado.nado_population_service.controller.entity.ChartData2D2DataSets;
 import com.nado.nado_population_service.douyuClient.DouyuDanmuBrokenMessageFilter;
 import com.nado.nado_population_service.douyuClient.repository.Daily5MinuteTrafficReportRepository;
-import com.nado.nado_population_service.enums.TrafficReportField;
+import com.nado.nado_population_service.douyuClient.repository.SampleMessageRepository;
+
 
 @Controller
 public class ChartController {
 
 	@Autowired
 	private DouyuDanmuBrokenMessageFilter clientWrapper;
+	@Autowired
+	private SampleMessageRepository sampleMessageRepository;
 	
-	@RequestMapping("/test")
+	@RequestMapping("/api/allSampleMessages")
 	@ResponseBody
-	public ChartData2D test(){
-		return new ChartData2D(){
-			{
-				setColor(new String[]{"rgba(100,100,100,0.5)","rgba(100,100,100,0.5)","rgba(100,100,100,0.5)"});
-				setData(new String[]{"44","55","66"});
-				setLabels(new String[]{"07:00","07:05","07:10"});
-			}
-		};
+	public  Map<String, List<String>> allSampleMessages(){
+		return sampleMessageRepository.printAsFiles();
 	}
 	@RequestMapping("/test2")
 	@ResponseBody
@@ -57,6 +55,14 @@ public class ChartController {
 		return ChartData2D2DataSets.fromMap(
 				clientWrapper.getTotalMessageRecordsByDate("2017-12-19"),
 				clientWrapper.getBrokenMessageRecordsByDate("2017-12-19"),
+				"rgba(100,100,100,0.5)");
+	}
+	@RequestMapping("/api/chartjs/trafficDataByDate")
+	@ResponseBody
+	public ChartData2D2DataSets trafficDataByDate(String date){
+		return ChartData2D2DataSets.fromMap(
+				clientWrapper.getTotalMessageRecordsByDate(date),
+				clientWrapper.getBrokenMessageRecordsByDate(date),
 				"rgba(100,100,100,0.5)");
 	}
 }

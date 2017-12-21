@@ -1,0 +1,1 @@
+/timestamp@=1513845480031/messageId@=9/type@=noble_num_info/sum@=32/list@=lev@AA=3@ASnum@AA=5@AS@Slev@AA=2@ASnum@AA=2@AS@Slev@AA=1@ASnum@AA=7@AS@Slev@AA=7@ASnum@AA=18@AS@S/rid@=2020877/

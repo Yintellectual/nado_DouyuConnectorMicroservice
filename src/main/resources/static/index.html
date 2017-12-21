@@ -28,84 +28,118 @@ canvas {
 				<option value="bar">Bar</option>
 			</select>
 			<button id="update">update</button>
+			&#x65E5;&#x671F;&#xFF08;&#x4F8B;&#x5982;&#xFF1A;2017-12-21&#xFF09;&#xFF1A;
+			<input id="date" />
+			<button id="date_submit">&#x786E;&#x5B9A;</button>
 			<script>
-
 				$(document)
 						.ready(
 								function() {
-									$.ajax({
-										url : "/api/chartjs/trafficDataOfToday/"
-									}).then(function(data) {
-										
-									
+									$
+											.ajax(
+													{
+														url : "/api/chartjs/trafficDataOfToday/"
+													})
+											.then(
+													function(data) {
 
-									var ctx = document.getElementById("chart1")
-											.getContext("2d");
-									ctx.canvas.width = 3000;
-									ctx.canvas.height = 300;
-									var cfg = {
-										type : 'bar',
-										data : {
-											labels : data.labels,
-											datasets : [ {
-												label : "\u603b\u6570\u636e\u6570\uff08\u0035\u5206\u949f\uff09",
-												data : data.data,
-												type : 'bar',
-												pointRadius : 0,
-												fill : true,        
-												lineTension : 0,
-												borderWidth : 2
-											},{
-												yAxisID: 'second-y-axis',
-												label : "\u635f\u574f\u6570\u636e\u6570\uff08\u0035\u5206\u949f\uff09",
-												data : data.data2,
-												type : 'line',
-												pointRadius : 0,
-												fill : false,
-												borderColor:"red",
-												lineTension : 0,
-												borderWidth : 2
-											} ]
-										},
-										options : {
-											scales : {
-												xAxes : [ {
-													distribution : 'series',
-													ticks : {
-														autoSkip: false,
-														source : 'labels'
-													}
-												} ],
-												yAxes : [ {
-													scaleLabel : {
-														display : true,
-														labelString : '\u603b\u6570\u636e\u6570\uff08\u0035\u5206\u949f\uff09'
-													},
-													type: 'logarithmic',
-												},{
-													id:'second-y-axis',
-													scaleLabel : {
-														display : true,
-														labelString : '\u635f\u574f\u6570\u636e\u6570\uff08\u0035\u5206\u949f\uff09'
-													},
-													//type: 'logarithmic',
-												} ]
-											}
-										}
-									};
-									var chart = new Chart(ctx, cfg);
+														var ctx = document
+																.getElementById(
+																		"chart1")
+																.getContext(
+																		"2d");
+														ctx.canvas.width = 3000;
+														ctx.canvas.height = 300;
+														var cfg = {
+															type : 'bar',
+															data : {
+																labels : data.labels,
+																datasets : [
+																		{
+																			label : "\u603b\u6570\u636e\u6570\uff08\u0035\u5206\u949f\uff09",
+																			data : data.data,
+																			type : 'bar',
+																			pointRadius : 0,
+																			fill : true,
+																			lineTension : 0,
+																			borderWidth : 2
+																		},
+																		{
+																			yAxisID : 'second-y-axis',
+																			label : "\u635f\u574f\u6570\u636e\u6570\uff08\u0035\u5206\u949f\uff09",
+																			data : data.data2,
+																			type : 'line',
+																			pointRadius : 0,
+																			fill : false,
+																			borderColor : "red",
+																			lineTension : 0,
+																			borderWidth : 2
+																		} ]
+															},
+															options : {
+																scales : {
+																	xAxes : [ {
+																		distribution : 'series',
+																		ticks : {
+																			autoSkip : false,
+																			source : 'labels'
+																		}
+																	} ],
+																	yAxes : [
+																			{
+																				scaleLabel : {
+																					display : true,
+																					labelString : '\u603b\u6570\u636e\u6570\uff08\u0035\u5206\u949f\uff09'
+																				},
+																				type : 'logarithmic',
+																			},
+																			{
+																				id : 'second-y-axis',
+																				scaleLabel : {
+																					display : true,
+																					labelString : '\u635f\u574f\u6570\u636e\u6570\uff08\u0035\u5206\u949f\uff09'
+																				},
+																			//type: 'logarithmic',
+																			} ]
+																}
+															}
+														};
+														var chart = new Chart(
+																ctx, cfg);
 
-									document
-											.getElementById('update')
-											.addEventListener(
-													'click',
-													function() {
-														var type = document
-																.getElementById('type').value;
-														chart.config.data.datasets[0].type = type;
-														chart.update();
+														document
+																.getElementById(
+																		'update')
+																.addEventListener(
+																		'click',
+																		function() {
+																			var type = document
+																					.getElementById('type').value;
+																			chart.config.data.datasets[0].type = type;
+																			chart
+																					.update();
+																		});
+														document
+																.getElementById(
+																		'date_submit')
+																.addEventListener(
+																		'click',
+																		function() {
+																			var date = document.getElementById('date').value;
+																			$.ajax(
+																					{
+																						url : "/api/chartjs/trafficDataByDate/"+"?date="+date,
+																					})
+																			.then(
+																					function(data) {
+																						chart.config.data.labels = data.labels;
+																			            chart.config.data.datasets[0].data = data.data;
+																			            chart.config.data.datasets[1].data = data.data2;
+																			            chart.update();
+																					});
+																		});
 													});
-									});});
+								});
 			</script>
 </body>
 
