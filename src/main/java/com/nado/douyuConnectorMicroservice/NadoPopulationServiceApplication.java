@@ -9,6 +9,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,13 +17,20 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
 import org.springframework.stereotype.Component;
 
 import com.nado.douyuConnectorMicroservice.douyuClient.DouyuDanmuBrokenMessageFilter;
 import com.nado.douyuConnectorMicroservice.douyuClient.DouyuDanmuClient;
 import com.nado.douyuConnectorMicroservice.douyuClient.impl.DouyuDanmuClientQueueImpl;
 import com.nado.douyuConnectorMicroservice.util.CommonUtil;
+import com.rabbitmq.client.BuiltinExchangeType;
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.ConnectionFactory;
 
 @EnableScheduling
 @SpringBootApplication
@@ -32,10 +40,32 @@ public class NadoPopulationServiceApplication {
 		SpringApplication.run(NadoPopulationServiceApplication.class, args);
 	}
 
-    @Bean(destroyMethod = "shutdown")
-    public Executor taskScheduler() {
-        return Executors.newScheduledThreadPool(5);
+
+	
+//    @Bean(destroyMethod = "shutdown")
+//    public Executor taskScheduler() {
+//        return Executors.newScheduledThreadPool(5);
+//    }
+    @Bean
+    public TaskScheduler taskScheduler() {
+        return new ConcurrentTaskScheduler();
     }
+
+    // Of course , you can define the Executor too
+    @Bean
+    public Executor taskExecutor() {
+        return new SimpleAsyncTaskExecutor();
+   }
+    
+	@Bean
+	public Channel rabbitMQChannel() throws IOException, TimeoutException{
+		ConnectionFactory factory = new ConnectionFactory();
+		factory.setHost("localHost");
+		Connection connection = factory.newConnection();
+		Channel channel = connection.createChannel();
+		channel.exchangeDeclare("douyu-cooked-messages", BuiltinExchangeType.TOPIC);
+		return channel;
+	}
 	
 	@Autowired
 	DouyuDanmuClient client;

@@ -26,6 +26,7 @@ import com.nado.douyuConnectorMicroservice.douyuClient.DouyuDanmuClient;
 import com.nado.douyuConnectorMicroservice.douyuClient.repository.Daily5MinuteTrafficReportRepository;
 import com.nado.douyuConnectorMicroservice.douyuClient.repository.SampleMessageRepository;
 import com.nado.douyuConnectorMicroservice.enums.MessageIntegrityStatuses;
+import com.rabbitmq.client.Channel;
 
 @Service
 public class DouyuDanmuBrokenMessageFilterNaiveImpl implements DouyuDanmuBrokenMessageFilter {
@@ -34,6 +35,8 @@ public class DouyuDanmuBrokenMessageFilterNaiveImpl implements DouyuDanmuBrokenM
 	Daily5MinuteTrafficReportRepository daily5MinuteTrafficReportRepository;
 	@Autowired
 	SampleMessageRepository sampleMessageRepository;
+	@Autowired
+	Channel rabbitMQChannel;
 	private int olderBrokenMessageCount = 0;
 	private int brokenMessageCount = 0;
 	private Map<String, String> latestBrokenMessageRecord = null;
@@ -157,7 +160,12 @@ public class DouyuDanmuBrokenMessageFilterNaiveImpl implements DouyuDanmuBrokenM
 	
 	@Override
 	public String publish(String type, String message) {
-		// TODO Auto-generated method stub
+		try {
+			rabbitMQChannel.basicPublish("douyu-cooked-messages", type, null, message.getBytes());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return message;
 	}
 
