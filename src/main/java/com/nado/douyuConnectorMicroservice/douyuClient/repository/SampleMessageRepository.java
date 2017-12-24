@@ -12,6 +12,14 @@ public interface SampleMessageRepository {
 	int getMaximumSizeForEachType();
 	void saveSample(String message, String type, MessageIntegrityStatuses field);
 	List<String> retieveSamplesByType(String type, MessageIntegrityStatuses field);
-	Map<String, List<String>> printAsFiles();
+	Map<String, List<String>> printAsFiles(boolean writeToFiles, boolean returnMessages, String ... fileNames);
 	Set<String> retieveTypes();
+	 Map<String, List<String>> printAllAsFiles();
+
+	 Map<String, List<String>> printAll();
+ 
+	 Set<String> printFileNames();
+
+	 Map<String, List<String>> printByFileNames(String ...fileNames );
+	
 }

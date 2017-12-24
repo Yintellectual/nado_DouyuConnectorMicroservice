@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +30,7 @@ import com.nado.douyuConnectorMicroservice.enums.MessageIntegrityStatuses;
 @Service
 public class SampleMessageRepositoryImpl implements SampleMessageRepository {
 
+	final String folderName = "sampleMessageFiles";
 	private static final int MAXMUM_INDEX_FOR_EACH_TYPE = 99;
 	@Autowired
 	StringRedisTemplate stringRedisTemplate;
@@ -70,11 +72,7 @@ public class SampleMessageRepositoryImpl implements SampleMessageRepository {
 		return listOperations.range(key, 0, -1);
 	}
 
-	@Override
-	public Map<String, List<String>> printAsFiles() {
-		Map<String, List<String>> result = new HashMap<>();
-		// TODO Auto-generated method stub
-		String folderName = "sampleMessageFiles";
+	private void clearSampleMessageFiles() {
 		Path folder = Paths.get(folderName);
 		try {
 			Files.createDirectory(folder);
@@ -105,25 +103,61 @@ public class SampleMessageRepositoryImpl implements SampleMessageRepository {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
+	}
+
+
+	
+	@Override
+	public Map<String, List<String>> printAsFiles(boolean writeToFiles, boolean returnMessages, String... fileNames) {
+		Map<String, List<String>> result = new HashMap<>();
+		String criteria = null;
+		if (fileNames != null & fileNames.length != 0) {
+			StringBuilder sb = new StringBuilder();
+			for (String fileName : fileNames) {
+				sb.append(fileName);
+			}
+			criteria = sb.toString();
+		}
+		// TODO Auto-generated method stub
+		clearSampleMessageFiles();
 		for (MessageIntegrityStatuses status : MessageIntegrityStatuses.values()) {
 			if (!status.equals(MessageIntegrityStatuses.total)) {
 				Set<String> types = retieveTypes();
 				if (types != null && !types.isEmpty()) {
 					for (String type : types) {
 						List<String> messages = retieveSamplesByType(type, status);
-						if (messages != null) {
+						if (messages != null && !messages.isEmpty()) {
 							String fileName = status + "_" + type + "_sample_messages_" + messages.size() + ".txt";
-							Path path = Paths.get(folderName, fileName);
-							result.put(fileName, messages);
-							messages.forEach(message -> {
-								try {
-									Files.write(path, (message + "\n").getBytes(), StandardOpenOption.APPEND,
-											StandardOpenOption.CREATE);
-								} catch (IOException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
+							boolean skip = false;
+							if (criteria != null) {// filter
+								String fragmentFileName = status + "_" + type + "_sample_messages_";
+								if (!criteria.contains(fragmentFileName)) {
+									skip = true;
+								} else {
+									skip = false;
 								}
-							});
+							} else {// do nothing
+
+							}
+							if (!skip) {
+								if (returnMessages) {
+									result.put(fileName, messages);
+								}else{
+									result.put(fileName, null);
+								}
+								if (writeToFiles) {
+									Path path = Paths.get(folderName, fileName);
+									messages.forEach(message -> {
+										try {
+											Files.write(path, (message + "\n").getBytes(), StandardOpenOption.APPEND,
+													StandardOpenOption.CREATE);
+										} catch (IOException e) {
+											// TODO Auto-generated catch block
+											e.printStackTrace();
+										}
+									});
+								}
+							}
 						}
 					}
 				}
@@ -131,4 +165,29 @@ public class SampleMessageRepositoryImpl implements SampleMessageRepository {
 		}
 		return result;
 	}
+
+	@Override
+	public Map<String, List<String>> printAllAsFiles() {
+		// TODO Auto-generated method stub
+		return printAsFiles(true,true);
+	}
+
+	@Override
+	public Map<String, List<String>> printAll() {
+		// TODO Auto-generated method stub
+		return printAsFiles(false,true);
+	}
+
+	@Override
+	public Set<String> printFileNames() {
+		// TODO Auto-generated method stub
+		return printAsFiles(false,false).keySet();
+	}
+
+	@Override
+	public Map<String, List<String>> printByFileNames(String... fileNames) {
+		// TODO Auto-generated method stub
+		return printAsFiles(false,true,fileNames);
+	}
+
 }

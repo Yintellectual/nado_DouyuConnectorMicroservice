@@ -27,19 +27,7 @@ public class ChartController {
 
 	@Autowired
 	private DouyuDanmuBrokenMessageFilter clientWrapper;
-	@Autowired
-	private SampleMessageRepository sampleMessageRepository;
 	
-	@RequestMapping("/api/sampleMessages/all")
-	@ResponseBody
-	public  Map<String, List<String>> allSampleMessages(){
-		return sampleMessageRepository.printAsFiles();
-	}
-	@RequestMapping("/api/sampleMessages/types")
-	@ResponseBody
-	public Set<String> messageTypes(){
-		return sampleMessageRepository.retieveTypes();
-	}
 	
 	@RequestMapping("/api/chartjs/trafficDataOfToday")
 	@ResponseBody
