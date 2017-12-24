@@ -83,7 +83,9 @@ public class SampleMessageRepositoryImpl implements SampleMessageRepository {
 			e1.printStackTrace();
 		}
 		try {
-			Files.walk(Paths.get(folderName)).filter(p->{return p.getFileName().toString().contains(".txt");}).forEach(arg0 -> {
+			Files.walk(Paths.get(folderName)).filter(p -> {
+				return p.getFileName().toString().contains(".txt");
+			}).forEach(arg0 -> {
 				try {
 					Files.delete(arg0);
 				} catch (NoSuchFileException x) {
@@ -105,22 +107,24 @@ public class SampleMessageRepositoryImpl implements SampleMessageRepository {
 		}
 		for (MessageIntegrityStatuses status : MessageIntegrityStatuses.values()) {
 			if (!status.equals(MessageIntegrityStatuses.total)) {
-				Set<String> types = setOperations.members("nado:sample_" + status + "_messages:types");
+				Set<String> types = retieveTypes();
 				if (types != null && !types.isEmpty()) {
 					for (String type : types) {
 						List<String> messages = retieveSamplesByType(type, status);
-						String fileName = status + "_" + type + "_sample_messages_" + messages.size() + ".txt";
-						Path path = Paths.get(folderName, fileName);
-												result.put(fileName, messages);
-						messages.forEach(message -> {
-							try {
-								Files.write(path, (message + "\n").getBytes(), StandardOpenOption.APPEND,
-										StandardOpenOption.CREATE);
-							} catch (IOException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-						});
+						if (messages != null) {
+							String fileName = status + "_" + type + "_sample_messages_" + messages.size() + ".txt";
+							Path path = Paths.get(folderName, fileName);
+							result.put(fileName, messages);
+							messages.forEach(message -> {
+								try {
+									Files.write(path, (message + "\n").getBytes(), StandardOpenOption.APPEND,
+											StandardOpenOption.CREATE);
+								} catch (IOException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+							});
+						}
 					}
 				}
 			}
