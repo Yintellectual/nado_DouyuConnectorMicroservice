@@ -20,6 +20,8 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -29,6 +31,7 @@ import com.nado.douyuConnectorMicroservice.util.CommonUtil;
 
 @Service
 public class DouyuDanmuClientQueueImpl implements DouyuDanmuClient {
+	private static final Logger logger = LoggerFactory.getLogger(DouyuDanmuClientQueueImpl.class);	
 	private Long messageId = 0l;
 	private int BUFFER_SIZE = 0xA00000;
 	private char[] buffer = new char[BUFFER_SIZE];
@@ -42,7 +45,7 @@ public class DouyuDanmuClientQueueImpl implements DouyuDanmuClient {
 
 	@PostConstruct
 	public void init() {
-		System.out.println("\n\nInit!!!\n\n");
+		logger.info("\n\nInit!!!\n\n");
 		clientSocket = douyuSocket();
 		// register(2020877+"");
 	}
@@ -54,7 +57,7 @@ public class DouyuDanmuClientQueueImpl implements DouyuDanmuClient {
 			address = clientSocket.getRemoteSocketAddress();
 			return result;
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error(e.toString());
 		}
 		return null;
 	}
@@ -79,7 +82,7 @@ public class DouyuDanmuClientQueueImpl implements DouyuDanmuClient {
 		try {
 			clientSocket.getOutputStream().write(result);
 			clientSocket.getOutputStream().flush();
-			System.out.println(Arrays.toString(result));
+			logger.info(Arrays.toString(result));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			try {
@@ -89,7 +92,7 @@ public class DouyuDanmuClientQueueImpl implements DouyuDanmuClient {
 				e1.printStackTrace();
 			}
 			register(room_id);
-			e.printStackTrace();
+			logger.error(e.toString());
 			return send(msg);
 		}
 		return result;
@@ -105,26 +108,26 @@ public class DouyuDanmuClientQueueImpl implements DouyuDanmuClient {
 			e1.printStackTrace();
 		}
 		this.room_id = room_id;
-		System.out.println("\n\nRegistering!!!\n\n");
+		logger.info("\n\nRegistering!!!\n\n");
 		if (clientSocket.isClosed()) {
-			System.out.println("Error when send and closed");
+			logger.info("Error when send and closed");
 			clientSocket = douyuSocket();
 		}
 		if (clientSocket.isConnected()) {
-			System.out.println("Error when send but connected");
+			logger.info("Error when send but connected");
 		} else {
-			System.out.println("Error when send and disconnected");
+			logger.info("Error when send and disconnected");
 			try {
 				clientSocket.connect(address);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error(e.toString());
 			}
 			try {
 				reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()), BUFFER_SIZE);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error(e.toString());
 			}
 			send("type@=loginreq/roomid@=" + room_id + "/");
 			String message = "";
@@ -133,23 +136,29 @@ public class DouyuDanmuClientQueueImpl implements DouyuDanmuClient {
 					message = messages.poll(10, TimeUnit.SECONDS);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
-					e.printStackTrace();
+					logger.error(e.toString());
 				} // take();
-				if (message.contains("loginres")) {
+				if(message!=null){
 					messages.offer(message);
-					break;
+					if(message.contains("loginres")){
+						break;
+					}else{
+						
+					}
+				}else{
+					
 				}
 
 			} while (true);
 			send("type@=joingroup/rid@=" + room_id + "/gid@=-9999/");
-			System.out.println("\n\nRegistered!!!\n\n");
+			logger.info("\n\nRegistered!!!\n\n");
 		}
 	}
 
 	@Scheduled(cron = "0/45 * * * * *")
 	public void heartbeat() {
 		if (!logout) {
-			System.out.println(Thread.currentThread().getName() + ":heartbeat");
+			logger.info(Thread.currentThread().getName() + ":heartbeat");
 			heartBeat.clear();
 			send("type@=mrkl/");
 			String message = "";
@@ -162,7 +171,7 @@ public class DouyuDanmuClientQueueImpl implements DouyuDanmuClient {
 					clientSocket.close();
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
-					e.printStackTrace();
+					logger.error(e.toString());
 				}
 				register(room_id);
 			}
@@ -173,7 +182,7 @@ public class DouyuDanmuClientQueueImpl implements DouyuDanmuClient {
 
 	@Override
 	public void logout() {
-		System.out.println("\n\nLogout!!!\n\n");
+		logger.info("\n\nLogout!!!\n\n");
 		logout = true;
 		// TODO Auto-generated method stub
 		if (clientSocket.isConnected()) {
@@ -183,19 +192,19 @@ public class DouyuDanmuClientQueueImpl implements DouyuDanmuClient {
 			clientSocket.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error(e.toString());
 		}
 	}
 
 	@Scheduled(cron = "* * * * * *")
 	public void getMessage() {
 		if (!logout) {
-			//System.out.println(Thread.currentThread().getName() + ": getMessage");
+			//logger.info(Thread.currentThread().getName() + ": getMessage");
 			try {
 				reader.read(buffer);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error(e.toString());
 			}
 			spliteAndDecorateMessages(new String(buffer)).forEach(str -> {
 				messages.offer(str);
@@ -211,7 +220,7 @@ public class DouyuDanmuClientQueueImpl implements DouyuDanmuClient {
 			message = messages.poll(1, TimeUnit.SECONDS);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error(e.toString());
 		}
 		if (message == null) {
 			return take();
@@ -239,13 +248,13 @@ public class DouyuDanmuClientQueueImpl implements DouyuDanmuClient {
 	}
 
 	private List<String> spliteAndDecorateMessages(String rawMessage) {
-		//System.out.println(rawMessage.trim());
+		//logger.info(rawMessage.trim());
 		if (rawMessage.contains("type@=mrkl/")) {
 			try {
 				heartBeat.put("/type@=mrkl/");
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error(e.toString());
 			}
 		}
 		String[] splitedRawMessage = (rawMessage.trim()).split(new String(new char[] { (char) 0 }));
