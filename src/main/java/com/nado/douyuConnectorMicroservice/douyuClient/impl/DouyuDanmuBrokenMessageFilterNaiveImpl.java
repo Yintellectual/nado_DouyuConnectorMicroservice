@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -30,11 +32,13 @@ import com.rabbitmq.client.Channel;
 
 @Service
 public class DouyuDanmuBrokenMessageFilterNaiveImpl implements DouyuDanmuBrokenMessageFilter {
-
+	private static final Logger logger = LoggerFactory.getLogger(DouyuDanmuBrokenMessageFilterNaiveImpl.class);	
 	@Autowired
 	Daily5MinuteTrafficReportRepository daily5MinuteTrafficReportRepository;
 	@Autowired
 	SampleMessageRepository sampleMessageRepository;
+	@Autowired
+	DouyuDanmuClient client;
 	@Autowired
 	Channel rabbitMQChannel;
 	private int olderBrokenMessageCount = 0;
@@ -83,6 +87,11 @@ public class DouyuDanmuBrokenMessageFilterNaiveImpl implements DouyuDanmuBrokenM
 	public int renewTrafficRecord() {
 		int total_message_count = totalMessageCount - olderTotalMessageCount;
 		olderTotalMessageCount = totalMessageCount;
+		if(total_message_count<=10){
+			client.logout();
+			client.register(""+2020877);
+			logger.warn("Re-registered!");
+		}
 		return total_message_count;
 	}
 

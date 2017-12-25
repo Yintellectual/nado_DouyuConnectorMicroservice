@@ -160,7 +160,7 @@ public class DouyuDanmuClientQueueImpl implements DouyuDanmuClient {
 		}
 	}
 
-	@Scheduled(cron = "0/45 * * * * *")
+	@Scheduled(cron = "0/30 * * * * *")
 	public void heartbeat() {
 		if (!logout) {
 			logger.info(Thread.currentThread().getName() + ":heartbeat");
