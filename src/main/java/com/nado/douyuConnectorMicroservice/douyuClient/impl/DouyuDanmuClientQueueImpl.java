@@ -8,6 +8,7 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Deque;
@@ -131,6 +132,7 @@ public class DouyuDanmuClientQueueImpl implements DouyuDanmuClient {
 			}
 			send("type@=loginreq/roomid@=" + room_id + "/");
 			String message = "";
+			List<String> temp = new ArrayList<>();
 			do {
 				try {
 					message = messages.poll(10, TimeUnit.SECONDS);
@@ -139,11 +141,14 @@ public class DouyuDanmuClientQueueImpl implements DouyuDanmuClient {
 					logger.error(e.toString());
 				} // take();
 				if(message!=null){
-					messages.offer(message);
+					temp.add(message);
 					if(message.contains("loginres")){
+						temp.forEach(m->{
+							messages.offer(m);
+						});
 						break;
 					}else{
-						
+						logger.error(message);
 					}
 				}else{
 					
