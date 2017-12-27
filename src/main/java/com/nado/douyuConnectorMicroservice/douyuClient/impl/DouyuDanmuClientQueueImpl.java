@@ -142,7 +142,7 @@ public class DouyuDanmuClientQueueImpl implements DouyuDanmuClient {
 				} // take();
 				if(message!=null){
 					temp.add(message);
-					if(message.contains("loginres")){
+					if(message.contains("loginres")||messages.size()>=5){
 						temp.forEach(m->{
 							messages.offer(m);
 						});
